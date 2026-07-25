@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="subnet_calc.vcxproj" />
+  <Project Path="subnet_calc.vcxproj" Id="3f47b260-377d-4487-bab5-67a698afc618" />
 </Solution>
