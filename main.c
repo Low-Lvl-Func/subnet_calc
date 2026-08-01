@@ -139,8 +139,31 @@ inline int get_subnets_nr(cidr_addr_t addr, cidr_addr_t base) {
     return (1 << (addr.prefix - base.prefix));
 }
 
-void compute_subnets() {
+void print_caddr_str_wo_pref(cidr_addr_t addr) {
+    char buff[CIDR_ADDR_MAX_STR_LEN] = { 0 };
+    cidr_addr_to_str_r(addr, buff);
+    buff[(int)strcspn(buff, "/")] = '\0';
+    printf(buff);
+}
 
+void print_subnets(cidr_addr_t addr, int hps, int nr_subnets) {
+    puts("Subnets:");
+    puts("Id | Usable hosts range | Broadcast");
+    for (int i = 1; i <= nr_subnets; i++) {
+        printf("#%d ", i);
+        print_caddr_str_wo_pref(addr);
+        putchar(' ');
+        addr.ip++;
+        print_caddr_str_wo_pref(addr);
+        putchar('-');
+        addr.ip += (hps - 1);
+        print_caddr_str_wo_pref(addr);
+        putchar(' ');
+        addr.ip++;
+        print_caddr_str_wo_pref(addr);
+        puts("");
+        addr.ip++;
+    }
 }
 
 signed main(void) {
@@ -155,5 +178,6 @@ signed main(void) {
     printf("Hosts/subnet: %d\n", hps);
     int nr_subnets = get_subnets_nr(caddr, base);
     printf("Nr. subnets: %d\n", nr_subnets);
+    print_subnets(base, hps, nr_subnets);
 	return 0;
 }
