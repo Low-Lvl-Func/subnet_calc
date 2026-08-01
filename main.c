@@ -115,16 +115,45 @@ void deb_print_cidr_addr(cidr_addr_t addr) {
     puts(cidr_addr_to_str_r(addr, aux));
 }
 
+cidr_addr_t get_base_cls(cidr_addr_t caddr) {
+    cidr_addr_t base;
+
+    // 1. Calculate classful prefix rounded down to nearest multiple of 8
+    base.prefix = (caddr.prefix / 8) * 8;
+
+    // 2. Generate bitmask to clear host bits
+    // Note: Special check for prefix 0 to prevent 32-bit shift overflow UB
+    uint32_t mask = (base.prefix == 0) ? 0 : (0xFFFFFFFFU << (32 - base.prefix));
+
+    // 3. Apply mask to zero-out lower bits
+    base.ip = caddr.ip & mask;
+
+    return base;
+}
+
+inline int get_hosts_per_subnet(cidr_addr_t addr) {
+    return (1 << (32 - addr.prefix)) - 2;
+}
+
+inline int get_subnets_nr(cidr_addr_t addr, cidr_addr_t base) {
+    return (1 << (addr.prefix - base.prefix));
+}
+
 void compute_subnets() {
 
 }
 
-int main(void) {
-	char input[] = "192.168.32.19/28";
+signed main(void) {
+	char input[] = "172.25.167.98/19";
 	puts(input);
 	cidr_addr_t caddr = cidr_addr_from_str(input);
-    deb_print_cidr_addr(caddr);
-
-
+    puts("--------------------------------------");
+    printf("Original: "); deb_print_cidr_addr(caddr);
+    cidr_addr_t base = get_base_cls(caddr);
+    printf("Base class: "); deb_print_cidr_addr(base);
+    int hps = get_hosts_per_subnet(caddr);
+    printf("Hosts/subnet: %d\n", hps);
+    int nr_subnets = get_subnets_nr(caddr, base);
+    printf("Nr. subnets: %d\n", nr_subnets);
 	return 0;
 }
